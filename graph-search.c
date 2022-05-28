@@ -12,21 +12,33 @@ typedef struct Graph {
 	int visited[GSIZE];		//방문기록저장
 }graph;
 
+typedef struct Queue {
+  int items[GSIZE];
+  int front;
+  int rear;
+}queue;
+
+
 graph* InitializeGraph(graph* g);		//그래프초기화
+
 void InsertVertex(graph* g);			//정점추가
 void InsertEdge(graph* g, int s, int a);	//점두개끼리 다리연결
 void printGraph(graph* g);				//그래프 출력
 void freeGraph(graph* g);				//메모리해제
 void DFS(graph* g, int v);				//깊이우선탐색
 void Initvisit(graph* g);				//방문기록초기화
-void BFS(graph* g, int v);				//너비우선탐색
-
+void BFS(graph* g, queue* q, int v);				//너비우선탐색
+void enqueue(queue* q, int value);		//큐에 줄서기
+int dequeue(queue* q);				//큐에 앞거 나오기
+queue* InitializeQueue(queue* q);	//큐초기화
+void freeQueue(queue* q);		//메모리해제
 
 int main()
 {
 	char command;
 	int key, key2;
 	graph* g = NULL;
+	queue* q = NULL;
 	printf("[----- [곽민정] [2021041021] -----]\n");
 	do{
 		printf("\n\n");
@@ -45,9 +57,11 @@ int main()
 		switch(command) {
 		case 'z': case 'Z':
 			g = InitializeGraph(g);
+			q = InitializeQueue(q);
 			break;
 		case 'q': case 'Q':
 			freeGraph(g);
+			freeQueue(q);
 			break;
 		case 'v': case 'V':
 			printf("vertex 수 : ");
@@ -57,7 +71,7 @@ int main()
 			}
 			break;
 		case 'd': case 'D':
-			printf("DFS시작 정점 : ");
+			printf("DFS시작 할 정점 : ");
 			scanf("%d", &key);
 			DFS(g, key);
 			Initvisit(g);	//방문기록초기화
@@ -71,9 +85,9 @@ int main()
 			InsertEdge(g, key, key2);
 			break;
 		case 'b': case 'B':
-			printf("DFS할 정점 : ");
+			printf("BFS시작 할 정점 : ");
 			scanf("%d", &key);
-			BFS(g, key);
+			BFS(g, q, key);
 			Initvisit(g);	//방문기록초기화
 			break;
 
@@ -106,7 +120,7 @@ graph* InitializeGraph(graph* g){
 	return temp;
 }
 void InsertVertex(graph* g) {
-	g->numV++;		//점갯수늘리기
+	g->numV++;		//점갯수추가
 }
 
 void InsertEdge(graph* g, int s, int a) {
@@ -136,8 +150,13 @@ void printGraph(graph* g) {
         printf("\n");
     }
 }
-void freeGraph(graph *g) {
-	free(g);
+void freeGraph(graph* g) {
+	if(g!=NULL)
+		free(g);
+}
+void freeQueue(queue* q) {
+	if(q!=NULL)
+		free(q);
 }
 
 void DFS(graph* g, int v) {
@@ -146,20 +165,70 @@ void DFS(graph* g, int v) {
 	
 	node* temp = list;
 	g->visited[v] = 1;		//방문체크
-	printf("visited [%d]", v);
+	printf("visited [%d]  ", v);
 	while(temp != NULL) {
 		int connectedVertex = temp->vertex;		//연결된 정점을
 
 		if(g->visited[connectedVertex] == 0) {		//방문안했으면 
-			printf("->");
 			DFS(g, connectedVertex);				//방문하기
 		}
 		temp = temp->next;
 	}
 }
+queue* InitializeQueue(queue* q) {
+	if(q!=NULL) {
+		free(q);
+	}
+	queue* temp = malloc(sizeof(queue));
+	temp->front = -1;
+	temp->rear = -1;
+	return temp;
+}
+void enqueue(queue* q, int value) {
+	if (q->rear == GSIZE - 1)		//queue자리없음
+		return;
+	else {
+		if (q->front == -1)
+		q->front = 0;
+		q->rear++;
+		q->items[q->rear] = value;
+	}
+}
 
-void BFS(graph* g, int v) {
+int dequeue(queue* q) {
+	int item;
+	if (q->rear==-1) {		//큐 비어있음
+		item = -1;
+	} else {
+		item = q->items[q->front];
+		q->front++;
+		if (q->front > q->rear) {		//rear랑 front랑 역전되면 되돌려놓기
+		q->front = q->rear = -1;
+		}
+	}
+	return item;
+}
 
+void BFS(graph* g, queue* q, int v) {
+	g->visited[v] = 1;
+	enqueue(q, v);		//시작점 큐에 추가
+
+	while (q->rear!=-1) {		//큐가 비어있지 않을때 까지
+		int currentVertex = dequeue(q);		//큐에서 하나 빼서 방문하기
+		printf("Visited [%d]  ", currentVertex);
+
+		node* temp = g->adj_list[currentVertex];
+
+		while (temp!=NULL) {		//인접리스트끝까지
+		int adjVertex = temp->vertex;
+
+		if (g->visited[adjVertex] == 0) {		//방문안했으면
+			g->visited[adjVertex] = 1;			//방문체크하고
+			enqueue(q, adjVertex);					//큐에 추가
+		}
+		temp = temp->next;
+		}
+	}
 }
 
 void Initvisit(graph* g) {
