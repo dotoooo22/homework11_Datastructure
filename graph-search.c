@@ -59,7 +59,7 @@ int main()
 			printf("DFS할 정점 : ");
 			scanf("%d", &key);
 			DFS(g, key);
-			Initvisit();	//방문기록초기화
+			Initvisit(g);	//방문기록초기화
 			break;
 
 		case 'e': case 'E':
@@ -140,7 +140,7 @@ void DFS(graph* g, int v) {
 	g->visited[v] = 1;		//방문체크
 	printf("visited [%d]", v);
 	while(temp != NULL) {
-		int connectedVertex = temp->vertex;		//연결된 곳을 넣고
+		int connectedVertex = temp->vertex;		//연결된 정점을
 
 		if(g->visited[connectedVertex] == 0) {		//방문안했으면 
 			printf("->");
