@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define GSIZE 10
+#define GSIZE 10		//벌텍스최대사이즈
 typedef struct Node {
 	int vertex;
 	struct Node* next;
 }node;
 
 typedef struct Graph {
-	int numV;
-	node* adj_list[GSIZE];
-	int* visited;
+	int numV;		//벌텍스갯수
+	node* adj_list[GSIZE];	//인접리스트
+	int visited[GSIZE];		//방문저장
 }graph;
 
 graph* InitializeGraph(graph* g);		//그래프초기화
@@ -17,6 +17,8 @@ void InsertVertex(graph* g);			//정점추가
 void InsertEdge(graph* g, int s, int a);	//점두개끼리 다리연결
 void printGraph(graph* g);				//그래프 출력
 void freeGraph(graph* g);				//메모리해제
+void DFS(graph* g, int v);
+void Initvisit(graph* g);
 
 
 int main()
@@ -54,7 +56,10 @@ int main()
 			}
 			break;
 		case 'd': case 'D':
-			//DFS
+			printf("DFS할 정점 : ");
+			scanf("%d", &key);
+			DFS(g, key);
+			Initvisit();	//방문기록초기화
 			break;
 
 		case 'e': case 'E':
@@ -83,14 +88,16 @@ int main()
 }
 
 graph* InitializeGraph(graph* g){
-	if(*g != NULL)
-		freeGraph(*g);		//머있으면 메모리해제
+	if(g != NULL)
+		freeGraph(g);		//머있으면 메모리해제
 	
 	graph* temp = (graph*)malloc(sizeof(graph));		//초기화
 	temp->numV = 0;
 
 	for(int v=0; v<GSIZE; v++) {
 		temp->adj_list[v] = NULL;
+		temp->visited[v] = 0;
+
 	}
 	return temp;
 }
@@ -123,4 +130,27 @@ void printGraph(graph* g) {
 }
 void freeGraph(graph *g) {
 	free(g);
+}
+
+void DFS(graph* g, int v) {
+	
+	node* list = g->adj_list[v];
+	
+	node* temp = list;
+	g->visited[v] = 1;		//방문체크
+	printf("visited [%d]", v);
+	while(temp != NULL) {
+		int connectedVertex = temp->vertex;		//연결된 곳을 넣고
+
+		if(g->visited[connectedVertex] == 0) {		//방문안했으면 
+			printf("->");
+			DFS(g, connectedVertex);				//방문하기
+		}
+		temp = temp->next;
+	}
+}
+void Initvisit(graph* g) {
+	for(int i=0; i<GSIZE; i++) {	//방문기록초기화
+		g->visited[i] = 0;
+	}
 }
