@@ -12,7 +12,7 @@ typedef struct Graph {
 	int visited[GSIZE];		//방문기록저장
 }graph;
 
-typedef struct Queue {
+typedef struct Queue {		//bfs를 할때 방문할 곳 넣을 큐
   int items[GSIZE];
   int front;
   int rear;
