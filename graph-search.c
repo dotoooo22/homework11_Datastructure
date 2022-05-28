@@ -9,7 +9,7 @@ typedef struct Node {
 typedef struct Graph {
 	int numV;		//벌텍스갯수
 	node* adj_list[GSIZE];	//인접리스트
-	int visited[GSIZE];		//방문저장
+	int visited[GSIZE];		//방문기록저장
 }graph;
 
 graph* InitializeGraph(graph* g);		//그래프초기화
@@ -17,8 +17,9 @@ void InsertVertex(graph* g);			//정점추가
 void InsertEdge(graph* g, int s, int a);	//점두개끼리 다리연결
 void printGraph(graph* g);				//그래프 출력
 void freeGraph(graph* g);				//메모리해제
-void DFS(graph* g, int v);
-void Initvisit(graph* g);
+void DFS(graph* g, int v);				//깊이우선탐색
+void Initvisit(graph* g);				//방문기록초기화
+void BFS(graph* g, int v);				//너비우선탐색
 
 
 int main()
@@ -56,7 +57,7 @@ int main()
 			}
 			break;
 		case 'd': case 'D':
-			printf("DFS할 정점 : ");
+			printf("DFS시작 정점 : ");
 			scanf("%d", &key);
 			DFS(g, key);
 			Initvisit(g);	//방문기록초기화
@@ -70,7 +71,10 @@ int main()
 			InsertEdge(g, key, key2);
 			break;
 		case 'b': case 'B':
-			//BFS
+			printf("DFS할 정점 : ");
+			scanf("%d", &key);
+			BFS(g, key);
+			Initvisit(g);	//방문기록초기화
 			break;
 
 		case 'p': case 'P':
@@ -106,15 +110,19 @@ void InsertVertex(graph* g) {
 }
 
 void InsertEdge(graph* g, int s, int a) {
-	node* newNode;
 	if(s>=g->numV || a>=g->numV) {		//벌텍스범위에없음
 		printf("벌텍스 범위 벗어남\n");
 		return;
 	}
-	newNode = (node*)malloc(sizeof(node));
+	node* newNode = (node*)malloc(sizeof(node));
 	newNode->vertex = a;
 	newNode->next = g->adj_list[s];		//연결
 	g->adj_list[s] = newNode;			//인접리스트에 추가
+	//반대에서도 연결
+	node* newNode2 = (node*)malloc(sizeof(node));
+	newNode2->vertex = s;
+	newNode2->next = g->adj_list[a];		//연결
+	g->adj_list[a] = newNode2;			//인접리스트에 추가
 }
 
 void printGraph(graph* g) {
@@ -149,6 +157,11 @@ void DFS(graph* g, int v) {
 		temp = temp->next;
 	}
 }
+
+void BFS(graph* g, int v) {
+
+}
+
 void Initvisit(graph* g) {
 	for(int i=0; i<GSIZE; i++) {	//방문기록초기화
 		g->visited[i] = 0;
